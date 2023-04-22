@@ -2,7 +2,6 @@
 
 // Copyright (C)Devsimsek. Researching token authentication
 class Auth extends SDF\Controller {
-  
   protected $request;
 
   protected array $users = [
@@ -16,8 +15,12 @@ class Auth extends SDF\Controller {
   
   public function __construct() {
     parent::__construct();
-    $this->load->file("sdb", SDF_APP_LIB);
-    $this->load->file("request", SDF_APP_MODL);
+    $_POST = is_array($_POST) ? $_POST : json_decode(file_get_contents('php://input'), true);
+    header('Access-Control-Allow-Origin: *');
+    header('Access-Control-Allow-Methods: GET, POST, OPTIONS');
+    header('Access-Control-Allow-Headers: Origin, Content-Type');
+    $this->load->file("Sdb", SDF_APP_LIB);
+    $this->load->file("Request", SDF_APP_MODL);
     $this->load->helper("auth");
     $this->request = new Request();
   }
@@ -75,4 +78,18 @@ class Auth extends SDF\Controller {
       print_r(json_encode(["status" => "error", "message" => "Bad request."]));
     }
   }
+
+  public function signout() {
+    if (!empty($_POST["token"])) {
+      $rs = removeSession($_POST["token"]);
+      if ($rs) {
+        $this->request->set_header(200);
+        print_r(json_encode(["status" => "success", "message" => "Session removed."]));
+      } else {
+        $this->request->set_header(404);
+        print_r(json_encode(["status" => "error", "message" => "Session not found."]));
+      }
+    }
+  }
 }
+

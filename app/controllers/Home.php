@@ -17,7 +17,8 @@ class Home extends SDF\Controller
      */
     public function __construct()
     {
-        parent::__construct();
+    parent::__construct();
+    header("Access-Control-Allow-Origin: *");
     }
 
     /**

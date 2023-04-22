@@ -23,6 +23,16 @@ function getSession(string $token): array|false {
   return false;
 }
 
+function removeSession(string $token) {
+  global $sessions;
+  if (is_array(getSession($token))) {
+    $sessions->remove(getSession($token)["username"]);
+    $sessions->save();
+    return true;
+  }
+  return false;
+}
+
 function createSession(string $user, string $token, int $expire) {
   global $sessions;
   $sessions->set($user, ["username" => $user, "token" => $token, "expire" => $expire]);
