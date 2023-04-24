@@ -42,8 +42,12 @@ function createSession(string $user, string $token, int $expire) {
 function registerUser(string $username, string $password) {
   /** @var Sdb */
   global $users;
-  $users->set($username, json_encode(["username" => $username, "password" => $password]));
-  $users->save();
+  if (!$users->has($username)) {
+    $users->set($username, json_encode(["username" => $username, "password" => $password]));
+    $users->save();
+    return true;
+  }
+  return false;
 }
 
 function getUser(string $username) {

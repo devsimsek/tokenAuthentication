@@ -15,3 +15,4 @@ $config['/api/auth/signin'] = ['Auth/signin', 'POST'];
 $config['/api/auth/signup'] = ['Auth/signup', 'POST'];
 $config['/api/auth/signout'] = ['Auth/signout', 'POST'];
 $config['/api/auth/session'] = ['Auth/session', 'POST']; // check session exists, Request type: post - Body: {"token": token, "expire": expire_timestamp}
+$config['/api/auth/{all}'] = ['Auth/preflight', 'OPTIONS'];

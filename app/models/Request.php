@@ -95,4 +95,13 @@ class Request extends SDF\Model
         header('HTTP/1.1 ' . $code . ' ' . $this->http_status($code));
         header('Content-Type: ' . $content_type . '; charset=' . $charset);
     }
+
+    public function get_input(string $field): array|false {
+      if ($field === "post") {
+        if (is_array($_POST) && !empty($_POST))
+          return $_POST;
+        return (array)json_decode(file_get_contents(('php://input')));
+      }
+      return false;
+    }
 }

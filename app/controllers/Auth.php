@@ -3,19 +3,9 @@
 // Copyright (C)Devsimsek. Researching token authentication
 class Auth extends SDF\Controller {
   protected $request;
-
-  protected array $users = [
-    [
-      "username" => "devsimsek",
-      "password" => "86318e52f5ed4801abe1d13d509443de" // ali
-    ]
-  ];
-
-  protected array $sessions = [];
   
   public function __construct() {
     parent::__construct();
-    $_POST = is_array($_POST) ? $_POST : json_decode(file_get_contents('php://input'), true);
     header('Access-Control-Allow-Origin: *');
     header('Access-Control-Allow-Methods: GET, POST, OPTIONS');
     header('Access-Control-Allow-Headers: Origin, Content-Type');
@@ -31,9 +21,9 @@ class Auth extends SDF\Controller {
   }
 
   public function signin() {
-    if (!empty($_POST) and !empty($_POST["username"]) && !empty($_POST["password"])) {
-      $user = json_decode(getUser($_POST["username"]));
-      if ($user->password === md5($_POST["password"])) {
+    if (!empty($this->request->get_input("post")["username"]) && !empty($this->request->get_input("post")["password"])) {
+      $user = json_decode(getUser($this->request->get_input("post")["username"]));
+      if ($user->password === md5($this->request->get_input("post")["password"])) {
         if (!isset(getSessions()[$user->username])) {
           $this->request->set_header(200);
           $token = generateToken();
@@ -51,16 +41,21 @@ class Auth extends SDF\Controller {
   }
 
   public function signup() {
-    if (!empty($_POST["username"]) && !empty($_POST["password"])) {
-      registerUser($_POST["username"], md5($_POST["password"]));
-      $this->request->set_header(200);
-      print_r(json_encode(["status" => "success", "message" => "Account created."]));
+    if (!empty($this->request->get_input("post")["username"]) && !empty($this->request->get_input("post")["password"])) {
+      $s = registerUser($this->request->get_input("post")["username"], md5($this->request->get_input("post")["password"]));
+      if ($s) {
+        $this->request->set_header(200);
+        print_r(json_encode(["status" => "success", "message" => "Account created."]));
+      } else {
+        $this->request->set_header(409);
+        print_r(json_encode(["status" => "conflict", "message" => "Account already exists."]));
+      }
     }
   }
 
   public function session() {
-    if (!empty($_POST["token"])) {
-      $session = getSession($_POST["token"]);
+    if (!empty($this->request->get_input("post")["token"])) {
+      $session = getSession($this->request->get_input("post")["token"]);
       if ($session) {
         if ($session["expire"] > time()) {
           $this->request->set_header(200);
@@ -80,8 +75,8 @@ class Auth extends SDF\Controller {
   }
 
   public function signout() {
-    if (!empty($_POST["token"])) {
-      $rs = removeSession($_POST["token"]);
+    if (!empty($this->request->get_input("post")["token"])) {
+      $rs = removeSession($this->request->get_input("post")["token"]);
       if ($rs) {
         $this->request->set_header(200);
         print_r(json_encode(["status" => "success", "message" => "Session removed."]));
@@ -90,6 +85,10 @@ class Auth extends SDF\Controller {
         print_r(json_encode(["status" => "error", "message" => "Session not found."]));
       }
     }
+  }
+
+  public function preflight() {
+    $this->request->set_header(200);
   }
 }
 
